@@ -33,6 +33,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { User } from "next-auth"
+import { usePathname } from "next/navigation"
 
 const data = {
   user: {
@@ -42,8 +43,8 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
+      title: "Leads",
+      url: "/",
       icon: IconDashboard,
     },
     {
@@ -152,11 +153,19 @@ const data = {
 }
 type Props = {
   user?: User;
+  activeTab?:boolean
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>& Props) {
   data.user = {avatar:props.user?.image!,email:props.user?.email!,name:props.user?.name!}
-  console.log(data.user)
+    const pathname = usePathname();
+
+  const currentTab = props?.activeTab || pathname;
+
+  data.navMain= data.navMain.map((item) => ({
+    ...item,
+    isActive: currentTab === item.url,
+  }));
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>

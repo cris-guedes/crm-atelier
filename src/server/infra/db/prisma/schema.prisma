@@ -1,0 +1,150 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+    Active
+    Inactive
+}
+
+enum UserType {
+    STANDART
+    ADMIN
+    MASTER
+}
+
+enum GenderType {
+    MAN
+    WOMAN
+}
+
+model Tenant {
+    id        String   @id @unique @default(uuid())
+    name      String
+    email     String   @unique
+    phone     String?
+    city      String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    users        User[]
+    customers    Customer[]
+    leads        Lead[]
+    events       Event[]
+    interactions CustomerInteractions[]
+}
+
+model Customer {
+    id       String     @id @unique @default(uuid())
+    tenant   Tenant     @relation(fields: [tenantId], references: [id])
+    tenantId String
+    name     String
+    phone    String
+    email    String
+    city     String?
+    gender   GenderType
+    Lead     Lead[]
+    Event    Event[]
+}
+
+model Lead {
+    id             String          @id @unique @default(uuid())
+    tenant         Tenant          @relation(fields: [tenantId], references: [id])
+    tenantId       String
+    customer       Customer        @relation(fields: [customerId], references: [id])
+    customerId     String
+    event          Event?          @relation(fields: [eventId], references: [id])
+    eventId        String?
+    additionalInfo String?
+    message        String?
+    budget         Int
+    assignee       User?           @relation(fields: [assigneeId], references: [id])
+    assigneeId     String?
+    origin         LeadOriginType? @relation(fields: [originId], references: [id])
+    originId       String?
+    status         LeadStausType?  @relation(fields: [statusId], references: [id])
+    statusId       String?
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+
+    CustomerInteractions CustomerInteractions[]
+}
+
+model LeadOriginType {
+    id        String   @id @unique @default(uuid())
+    type      String
+    Lead      Lead[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model LeadStausType {
+    id        String   @id @unique @default(uuid())
+    type      String
+    Lead      Lead[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model CustomerInteractions {
+    id             String   @id @unique @default(uuid())
+    tenant         Tenant   @relation(fields: [tenantId], references: [id])
+    tenantId       String
+    lead           Lead     @relation(fields: [leadId], references: [id])
+    additionalInfo String?
+    leadId         String
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+}
+
+model Event {
+    id          String     @id @unique @default(uuid())
+    tenant      Tenant     @relation(fields: [tenantId], references: [id])
+    tenantId    String
+    name        String?
+    eventType   EventType  @relation(fields: [eventTypeId], references: [id])
+    eventTypeId String
+    Lead        Lead[]
+    customers   Customer[]
+    city        String?
+    date        String
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+}
+
+model EventType {
+    id        String   @id @unique @default(uuid())
+    type      String
+    Event     Event[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model User {
+    id         String        @id @unique @default(uuid())
+    tenant     Tenant        @relation(fields: [tenantId], references: [id])
+    tenantId   String
+    name       String
+    email      String        @unique
+    password   String
+    position   PositionType? @relation(fields: [positionId], references: [id])
+    positionId String?
+    userType   UserType
+    userStatus UserStatus    @default(Active)
+    leads      Lead[]
+    createdAt  DateTime      @default(now())
+    updatedAt  DateTime      @updatedAt
+}
+
+model PositionType {
+    id        String   @id @unique @default(uuid())
+    type      String
+    User      User[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}

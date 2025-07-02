@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/sessionProvider";
 import { getServerSession } from "next-auth";
+import { EmotionThemeProvider } from "@/components/EmotionThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,16 +25,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-   const session = await getServerSession();
+  const session = await getServerSession();
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProvider session={session}>
-{children}
+          <EmotionThemeProvider>{children}</EmotionThemeProvider>
         </SessionProvider>
-        
       </body>
     </html>
   );
